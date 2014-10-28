@@ -557,7 +557,7 @@ Namespace UI
                         _UserControl.Zone.TopLevelControl.MaximumSize = MaxSize
                         
                         ' Force Layout to be updated because it may not fit anymore now...
-                        DummySize.Width = CInt(IIf(DummySize.Width = 1, -1, 1))
+                        DummySize.Width = CInt(If(DummySize.Width = 1, -1, 1))
                         _UserControl.Zone.TopLevelControl.Size += DummySize
                         
                     ElseIf (Not ((_Form is Nothing) OrElse _Form.IsDisposed)) then
