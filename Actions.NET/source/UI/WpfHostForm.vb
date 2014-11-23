@@ -11,9 +11,6 @@ Namespace UI
      ''' The form contains one single <see cref="System.Windows.Forms.Integration.ElementHost"/> 
      ''' control that completely filles the whole window. It will match the WPF UserControl's size.
      ''' </para>
-     ''' <para>
-     ''' This class is intended for use by the <see cref="Rstyx.Excel.ActionsNET.UI.WpfPanel"/> 
-     ''' </para>
      ''' </remarks>
     Public Class WpfHostForm
         Inherits System.Windows.Forms.Form

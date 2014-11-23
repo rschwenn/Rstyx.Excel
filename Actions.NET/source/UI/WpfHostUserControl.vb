@@ -14,10 +14,10 @@ Namespace UI
      ''' control that completely filles the whole Forms UserControl. It will match the WPF UserControl's size.
      ''' </para>
      ''' <para>
-     ''' This class is intended for use by the <see cref="Rstyx.Excel.ActionsNET.UI.WpfPanel"/> 
+     ''' This class is intended for use by the ExcelDNA's <c>CustomTaskPaneFactory.CreateCustomTaskPane()</c> 
      ''' </para>
      ''' <para>
-     ''' For EXcelDNA: Would need to be marked with [ComVisible(true)] if in a project that is marked as [assembly:ComVisible(false)] which is the default for VS projects. 
+     ''' For ExcelDNA: Would need to be marked with [ComVisible(true)] if in a project that is marked as [assembly:ComVisible(false)] which is the default for VS projects. 
      ''' </para>
      ''' </remarks>
     <ComVisible(True)>
