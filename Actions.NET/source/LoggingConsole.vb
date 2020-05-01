@@ -20,14 +20,14 @@ Public Module LoggingConsole
         
         ''' <summary> Writes a error message to LoggingConsole. </summary>
          ''' <param name="Message"> The message to log. </param>
-        <ExcelFunction(Description:="Schreibt eine Error-Nachricht in die Protokoll-Konsole")>
+        <ExcelFunction(Description:="Schreibt eine Fehler-Nachricht in die Protokoll-Konsole")>
         Public Sub LoggingConsoleLogError(Message As String)
             Logger.logError(Message)
         End Sub
         
         ''' <summary> Writes a warning message to LoggingConsole. </summary>
          ''' <param name="Message"> The message to log. </param>
-        <ExcelFunction(Description:="Schreibt eine Warning-Nachricht in die Protokoll-Konsole")>
+        <ExcelFunction(Description:="Schreibt eine Warnungs-Nachricht in die Protokoll-Konsole")>
         Public Sub LoggingConsoleLogWarning(Message As String)
             Logger.logWarning(Message)
         End Sub
@@ -46,13 +46,13 @@ Public Module LoggingConsole
             Logger.logDebug(Message)
         End Sub
         
-        ''' <summary> Shows LoggingConsole in a Excel dock window (Custom Task Pane). </summary>
+        ''' <summary> Shows LoggingConsole. </summary>
         <ExcelFunction(Description:="Zeigt die Protokoll-Konsole an")>
         Public Sub LoggingConsoleShow()
             LogBox.Instance.showFloatingConsoleView(suppressErrorOnFail:=False)
         End Sub
         
-        ''' <summary> Hides LoggingConsole if shown in a Excel dock window (Custom Task Pane). </summary>
+        ''' <summary> Hides LoggingConsole if shown. </summary>
         <ExcelFunction(Description:="Versteckt die Protokoll-Konsole")>
         Public Sub LoggingConsoleHide()
             LogBox.Instance.hideFloatingConsoleView()
@@ -67,8 +67,11 @@ Public Module LoggingConsole
         Friend Sub LoggingConsoleInit()
         
             'LogBox.Instance.DisplayName = LogBox.Instance.DisplayName & " (Excel)"
-            LogBox.Instance.ShowFloatingConsoleViewAction = AddressOf showExcelConsole
-            LogBox.Instance.HideFloatingConsoleViewAction = AddressOf hideExcelConsole
+            
+            ' Office 365 (x64) hides the custom task pane whenever a workbook is open.
+            ' So, use LoggingConsole's built-in window.
+            'LogBox.Instance.ShowFloatingConsoleViewAction = AddressOf ShowExcelConsole
+            'LogBox.Instance.HideFloatingConsoleViewAction = AddressOf HideExcelConsole
         
             Logger = LogBox.getLogger(LoggerName)
         End Sub
@@ -97,8 +100,11 @@ Public Module LoggingConsole
         'End Sub
         
         ''' <summary> Shows the <see cref="Rstyx.LoggingConsole.ConsoleView"/> in a Excel dock window (Custom Task Pane). </summary>
-        Private Sub showExcelConsole()
-            If (LogViewerDock Is Nothing) Then
+        Private Sub ShowExcelConsole()
+            
+            If (IsLogViewerDockAlive()) Then
+                LogViewerDock.Visible = True
+            Else
                 Try
                     LogViewerDock = CustomTaskPaneFactory.CreateCustomTaskPane(GetType(WpfHostUserControl), LogBox.Instance.DisplayName)
                     
@@ -125,25 +131,39 @@ Public Module LoggingConsole
                         End Select
                     Finally
                         'AddHandler LogViewerDock.DockPositionStateChange, AddressOf ctp_DockPositionStateChange
-                        AddHandler LogViewerDock.VisibleStateChange, AddressOf ctp_VisibleStateChange
+                        AddHandler LogViewerDock.VisibleStateChange, AddressOf CTP_VisibleStateChange
                     End Try
                 Catch ex As System.Exception
                     System.Diagnostics.Debug.Print(ex.ToString())
                 End Try 
-            Else
-                LogViewerDock.Visible = True
             End If
         End Sub
         
         ''' <summary> Hides the Excel docking window, which is showing LoggingConsole. </summary>
-        Private Sub hideExcelConsole()
-            If (LogViewerDock IsNot Nothing) Then LogViewerDock.Visible = False
+        Private Sub HideExcelConsole()
+            If IsLogViewerDockAlive() Then LogViewerDock.Visible = False
         End Sub
+        
+        ''' <summary> Tells if the Excel docking window, which is showing LoggingConsole, is alive (hence not disposed). </summary>
+        Private Function IsLogViewerDockAlive() As Boolean
+            Dim RetValue As Boolean = False
+            
+            If (LogViewerDock IsNot Nothing) Then
+                Try
+                    Dim dummy As Boolean = LogViewerDock.Visible
+                    RetValue = True
+                Catch ex As Exception
+                    ' Dock has been disposed.
+                End Try
+            End If
+            
+            Return RetValue
+        End Function
         
         ''' <summary> Handles VisibleStateChange event. </summary>
         ''' <param name="ctp"> The CustomTaskPane. </param>
         ''' <remarks> Saves dock panel settings if it's just closed. </remarks>
-        Private Sub ctp_VisibleStateChange(ctp As CustomTaskPane)
+        Private Sub CTP_VisibleStateChange(ctp As CustomTaskPane)
             If (Not ctp.Visible) Then
                 My.Settings.LoggingConsoleDockPosition = ctp.DockPosition
                 My.Settings.LoggingConsoleSize = New System.Drawing.Size(ctp.Width, ctp.Height)
@@ -151,7 +171,7 @@ Public Module LoggingConsole
             End If
         End Sub
         
-        Private Sub ctp_DockPositionStateChange(ctp As CustomTaskPane)
+        Private Sub CTP_DockPositionStateChange(ctp As CustomTaskPane)
             ' Size can't be changed while event handler is active!
             If (ctp.DockPosition = MsoCTPDockPosition.msoCTPDockPositionFloating) Then
                 Try
