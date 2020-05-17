@@ -1,6 +1,5 @@
 ﻿
 Imports System
-Imports System.Diagnostics
 
 Imports ExcelDna.Integration
 Imports ExcelDna.Integration.CustomUI
@@ -8,12 +7,12 @@ Imports ExcelDna.Integration.CustomUI
 Imports Rstyx.LoggingConsole
 Imports Rstyx.Excel.ActionsNET.UI
 
+
 ''' <summary> Integrates LoggingConsole and provides LoggingConsole related public actions, accessible by VBA. </summary>
 Public Module LoggingConsole
     
     Dim Logger          As Logger
     Dim LoggerName      As String = "Actions.NET"
-    'Dim LogViewer       As WpfHostForm
     Dim LogViewerDock   As CustomTaskPane
     
     #Region "Public Actions"
@@ -68,10 +67,8 @@ Public Module LoggingConsole
         
             'LogBox.Instance.DisplayName = LogBox.Instance.DisplayName & " (Excel)"
             
-            ' Office 365 (x64) hides the custom task pane whenever a workbook is open.
-            ' So, use LoggingConsole's built-in window.
-            'LogBox.Instance.ShowFloatingConsoleViewAction = AddressOf ShowExcelConsole
-            'LogBox.Instance.HideFloatingConsoleViewAction = AddressOf HideExcelConsole
+            LogBox.Instance.ShowFloatingConsoleViewAction = AddressOf ShowExcelConsole
+            LogBox.Instance.HideFloatingConsoleViewAction = AddressOf HideExcelConsole
         
             Logger = LogBox.getLogger(LoggerName)
         End Sub
@@ -99,44 +96,42 @@ Public Module LoggingConsole
             
         'End Sub
         
-        ''' <summary> Shows the <see cref="Rstyx.LoggingConsole.ConsoleView"/> in a Excel dock window (Custom Task Pane). </summary>
+        ''' <summary> Shows the <see cref="Rstyx.LoggingConsole.ConsoleView"/> in a new Excel dock window (Custom Task Pane). </summary>
+        ''' <remarks>  Since there can be only one LoggingConsole's ConsoleView, an existing task pane with it will be destroyed first. </remarks>
         Private Sub ShowExcelConsole()
-            
-            If (IsLogViewerDockAlive()) Then
+            Try
+                DropLogViewerDock()
+                
+                LogViewerDock = CustomTaskPaneFactory.CreateCustomTaskPane(GetType(WpfHostUserControl), LogBox.Instance.DisplayName)
+                
+                Dim ucLogViewer As WpfHostUserControl = CType(LogViewerDock.ContentControl, WpfHostUserControl)
+                ucLogViewer.WpfHost.Child = LogBox.Instance.Console.ConsoleView
+                
                 LogViewerDock.Visible = True
-            Else
+                
+                Dim RecentDockPosition As MsoCTPDockPosition
+                If ([Enum].TryParse(Of MsoCTPDockPosition)(My.Settings.LoggingConsoleDockPosition, RecentDockPosition)) Then
+                    LogViewerDock.DockPosition = RecentDockPosition
+                Else
+                    LogViewerDock.DockPosition = MsoCTPDockPosition.msoCTPDockPositionBottom
+                End If
                 Try
-                    LogViewerDock = CustomTaskPaneFactory.CreateCustomTaskPane(GetType(WpfHostUserControl), LogBox.Instance.DisplayName)
-                    
-                    Dim ucLogViewer As WpfHostUserControl = CType(LogViewerDock.ContentControl, WpfHostUserControl)
-                    ucLogViewer.WpfHost.Child = LogBox.Instance.Console.ConsoleView
-                    
-                    LogViewerDock.Visible = True
-                    
-                    Dim RecentDockPosition As MsoCTPDockPosition
-                    If ([Enum].TryParse(Of MsoCTPDockPosition)(My.Settings.LoggingConsoleDockPosition, RecentDockPosition)) Then
-                        LogViewerDock.DockPosition = RecentDockPosition
-                    Else
-                        LogViewerDock.DockPosition = MsoCTPDockPosition.msoCTPDockPositionBottom
-                    End If
-                    Try
-                        Select Case LogViewerDock.DockPosition
-                            Case MsoCTPDockPosition.msoCTPDockPositionBottom, MsoCTPDockPosition.msoCTPDockPositionTop
-                                LogViewerDock.Height = My.Settings.LoggingConsoleSize.Height
-                            Case MsoCTPDockPosition.msoCTPDockPositionLeft, MsoCTPDockPosition.msoCTPDockPositionRight
-                                LogViewerDock.Width  = My.Settings.LoggingConsoleSize.Width
-                            Case MsoCTPDockPosition.msoCTPDockPositionFloating
-                                LogViewerDock.Height = My.Settings.LoggingConsoleSize.Height
-                                LogViewerDock.Width  = My.Settings.LoggingConsoleSize.Width
-                        End Select
-                    Finally
-                        'AddHandler LogViewerDock.DockPositionStateChange, AddressOf ctp_DockPositionStateChange
-                        AddHandler LogViewerDock.VisibleStateChange, AddressOf CTP_VisibleStateChange
-                    End Try
-                Catch ex As System.Exception
-                    System.Diagnostics.Debug.Print(ex.ToString())
-                End Try 
-            End If
+                    Select Case LogViewerDock.DockPosition
+                        Case MsoCTPDockPosition.msoCTPDockPositionBottom, MsoCTPDockPosition.msoCTPDockPositionTop
+                            LogViewerDock.Height = My.Settings.LoggingConsoleSize.Height
+                        Case MsoCTPDockPosition.msoCTPDockPositionLeft, MsoCTPDockPosition.msoCTPDockPositionRight
+                            LogViewerDock.Width  = My.Settings.LoggingConsoleSize.Width
+                        Case MsoCTPDockPosition.msoCTPDockPositionFloating
+                            LogViewerDock.Height = My.Settings.LoggingConsoleSize.Height
+                            LogViewerDock.Width  = My.Settings.LoggingConsoleSize.Width
+                    End Select
+                Finally
+                    'AddHandler LogViewerDock.DockPositionStateChange, AddressOf ctp_DockPositionStateChange
+                    AddHandler LogViewerDock.VisibleStateChange, AddressOf CTP_VisibleStateChange
+                End Try
+            Catch ex As System.Exception
+                System.Diagnostics.Debug.Print(ex.ToString())
+            End Try 
         End Sub
         
         ''' <summary> Hides the Excel docking window, which is showing LoggingConsole. </summary>
@@ -150,7 +145,7 @@ Public Module LoggingConsole
             
             If (LogViewerDock IsNot Nothing) Then
                 Try
-                    Dim dummy As Boolean = LogViewerDock.Visible
+                    Dim dummy As Object = LogViewerDock.Window
                     RetValue = True
                 Catch ex As Exception
                     ' Dock has been disposed.
@@ -160,14 +155,40 @@ Public Module LoggingConsole
             Return RetValue
         End Function
         
+        ''' <summary> Drops the task pane and disconnect it's child. </summary>
+        ''' <remarks>
+        ''' Saves dock panel position and size and drops the task pane.
+        ''' LoggingConsole's ConsoleView will be disconnected in order to be used again in another task pane. 
+        ''' </remarks>
+        Private Sub DropLogViewerDock()
+            Try
+                If (LogViewerDock IsNot Nothing) Then
+                    My.Settings.LoggingConsoleDockPosition = LogViewerDock.DockPosition
+                    My.Settings.LoggingConsoleSize = New System.Drawing.Size(LogViewerDock.Width, LogViewerDock.Height)
+                    My.Settings.Save()
+                End If
+            Catch ex As Exception
+                '
+            End Try
+            
+            Try
+                If (LogViewerDock IsNot Nothing) Then
+                    Dim ucLogViewer As WpfHostUserControl = CType(LogViewerDock.ContentControl, WpfHostUserControl)
+                    ucLogViewer.WpfHost.Child = Nothing
+                    LogViewerDock.Delete()
+                    LogViewerDock = Nothing
+                End If
+            Catch ex As Exception
+                '
+            End Try
+        End Sub
+        
         ''' <summary> Handles VisibleStateChange event. </summary>
         ''' <param name="ctp"> The CustomTaskPane. </param>
-        ''' <remarks> Saves dock panel settings if it's just closed. </remarks>
+        ''' <remarks> Drops the task pane if it has been set to invisible. </remarks>
         Private Sub CTP_VisibleStateChange(ctp As CustomTaskPane)
             If (Not ctp.Visible) Then
-                My.Settings.LoggingConsoleDockPosition = ctp.DockPosition
-                My.Settings.LoggingConsoleSize = New System.Drawing.Size(ctp.Width, ctp.Height)
-                My.Settings.Save()
+                DropLogViewerDock()
             End If
         End Sub
         
