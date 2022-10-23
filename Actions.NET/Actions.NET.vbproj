@@ -10,7 +10,7 @@
     <AssemblyName>Actions.NET</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <MyType>Windows</MyType>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <TargetFrameworkProfile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
@@ -61,6 +61,9 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="Rstyx.LoggingConsole">
       <HintPath>..\..\Rstyx.LoggingConsole\LoggingConsole\bin\Rstyx.LoggingConsole.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Threading.Tasks.Dataflow">
+      <HintPath>..\..\Rstyx.LoggingConsole\LoggingConsole\bin\System.Threading.Tasks.Dataflow.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />

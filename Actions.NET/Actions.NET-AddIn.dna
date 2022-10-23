@@ -2,8 +2,8 @@
   
   <ExternalLibrary Path="Actions.NET.dll" ComServer="false" LoadFromBytes="true" Pack="true" />
   
+  <Reference Path="System.Threading.Tasks.Dataflow.dll" LoadFromBytes="true" Pack="true" />
   <Reference Path="Rstyx.LoggingConsole.dll" LoadFromBytes="true" Pack="true" />
-  <!--<Reference Path="Lib\Rstyx.LoggingConsole.dll" LoadFromBytes="false" Pack="true" />-->
   <Reference Path="de\Rstyx.LoggingConsole.resources.dll" LoadFromBytes="true" Pack="true" />
   
   <!-- 
