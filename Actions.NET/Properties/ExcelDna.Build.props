@@ -48,7 +48,7 @@
     <!--
       Define the suffix used for each platform-specific file e.g. MyAddIn64.dna
     -->
-    <ExcelDna32BitAddInSuffix Condition="'$(ExcelDna32BitAddInSuffix)' == ''"></ExcelDna32BitAddInSuffix>
+    <ExcelDna32BitAddInSuffix Condition="'$(ExcelDna32BitAddInSuffix)' == ''">32</ExcelDna32BitAddInSuffix>
     <ExcelDna64BitAddInSuffix Condition="'$(ExcelDna64BitAddInSuffix)' == ''">64</ExcelDna64BitAddInSuffix>
   </PropertyGroup>
 
