@@ -12,7 +12,7 @@ Imports System.Runtime.InteropServices
 <Assembly: AssemblyDescription("Excel-Addin. Bietet in VBA sichtbare Makros, die .NET-Code ausführen.")> 
 <Assembly: AssemblyCompany("Robert Schwenn")> 
 <Assembly: AssemblyProduct("Actions.NET")> 
-<Assembly: AssemblyCopyright("Copyright ©  2014-2022")> 
+<Assembly: AssemblyCopyright("Copyright ©  2014-2023")> 
 <Assembly: AssemblyTrademark("")> 
 
 <Assembly: ComVisible(False)>
