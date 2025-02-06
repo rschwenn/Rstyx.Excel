@@ -12,7 +12,7 @@ Imports System.Runtime.InteropServices
 <Assembly: AssemblyDescription("Excel-Addin. Bietet in VBA sichtbare Makros, die .NET-Code ausführen.")> 
 <Assembly: AssemblyCompany("Robert Schwenn")> 
 <Assembly: AssemblyProduct("Actions.NET")> 
-<Assembly: AssemblyCopyright("Copyright ©  2014-2023")> 
+<Assembly: AssemblyCopyright("Copyright ©  2014-2025")> 
 <Assembly: AssemblyTrademark("")> 
 
 <Assembly: ComVisible(False)>
@@ -31,5 +31,5 @@ Imports System.Runtime.InteropServices
 ' übernehmen, indem Sie "*" eingeben:
 ' <Assembly: AssemblyVersion("1.0.*")> 
 
-<Assembly: AssemblyVersion("1.7.0.1")> 
-<Assembly: AssemblyFileVersion("1.7.0.1")> 
+<Assembly: AssemblyVersion("1.7.0.2")> 
+<Assembly: AssemblyFileVersion("1.7.0.2")> 

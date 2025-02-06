@@ -12,7 +12,7 @@ Excel-Addin Actions.NET
 
 Dependencies
 ------------
- - .NET Framework 4.5
+ - .NET Framework 4.6.2
  - ExcelDNA (http://exceldna.codeplex.com/)
  - LoggingConsole (https://github.com/rschwenn/Rstyx.LoggingConsole)
 
